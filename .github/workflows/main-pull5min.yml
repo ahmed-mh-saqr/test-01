@@ -1,0 +1,34 @@
+name: Cleanup Old Branches and Pull Requests - 5 Minutes
+
+on:
+  workflow_dispatch: # Allows manual trigger of the workflow
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Close Old Pull Requests
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fiveMinutesAgo = new Date();
+          fiveMinutesAgo.setMinutes(fiveMinutesAgo.getMinutes() - 5);
+
+          const pulls = await github.paginate(github.rest.pulls.list, {
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            state: 'open'
+          });
+
+          for (const pull of pulls) {
+            if (new Date(pull.updated_at) < fiveMinutesAgo) {
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pull.number,
+                state: 'closed'
+              });
+              console.log(`Closed stale pull request: ${pull.number}`);
+            }
+          }
