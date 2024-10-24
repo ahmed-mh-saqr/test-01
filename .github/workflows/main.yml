@@ -1,0 +1,74 @@
+name: Cleanup Old Branches and Pull Requests
+
+on:
+  workflow_dispatch: # Allows manual trigger of the workflow
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+
+    - name: Delete Old Branches
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const sixMonthsAgo = new Date();
+          sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+          const branches = await github.paginate(github.rest.repos.listBranches, {
+            owner: context.repo.owner,
+            repo: context.repo.repo
+          });
+
+          for (const branch of branches) {
+            if (branch.name !== 'main' && branch.name !== 'master' && !branch.protected) {
+              const commit = await github.rest.repos.getCommit({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: branch.name
+              });
+
+              const commitDate = new Date(commit.data.commit.committer.date);
+
+              if (commitDate < sixMonthsAgo) {
+                try {
+                  await github.rest.git.deleteRef({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    ref: `heads/${branch.name}`
+                  });
+                  console.log(`Deleted branch: ${branch.name}`);
+                } catch (error) {
+                  console.log(`Failed to delete branch: ${branch.name} - ${error.message}`);
+                }
+              }
+            }
+          }
+
+    - name: Close Stale Pull Requests
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const staleTime = new Date();
+          staleTime.setMonth(staleTime.getMonth() - 6); // Set to 6 months ago
+
+          const pulls = await github.paginate(github.rest.pulls.list, {
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            state: 'open'
+          });
+
+          for (const pull of pulls) {
+            if (new Date(pull.updated_at) < staleTime) {
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pull.number,
+                state: 'closed'
+              });
+              console.log(`Closed stale pull request: ${pull.number}`);
+            }
+          }
