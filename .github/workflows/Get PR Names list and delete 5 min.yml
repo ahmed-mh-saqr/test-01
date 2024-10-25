@@ -40,7 +40,7 @@ jobs:
 
           echo "branches_to_delete=${to_delete[*]}" >> $GITHUB_ENV
           echo "branches_to_delete=${to_delete[*]}"
-          echo "::GITHUB_OUTPUT name=branches_to_delete::$branches"
+          echo "::GITHUB_OUTPUT name=branches_to_delete::${to_delete[*]}"
           
       - name: Delete old branches
         if: steps.list_branches.outputs.branches_to_delete != ''
