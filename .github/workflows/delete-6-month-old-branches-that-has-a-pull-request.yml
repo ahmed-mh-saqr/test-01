@@ -1,0 +1,54 @@
+name: Get PR Names list and delete
+
+on:
+  workflow_dispatch: # Allows manual trigger of the workflow
+
+jobs:
+  delete_old_branches:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16' # You can specify any version compatible with the dependencies
+
+      - name: List branches and check for old PRs
+        id: list_branches
+        run: |
+          six_months_ago=$(date -d '6 months ago' '+%Y-%m-%dT%H:%M:%SZ')
+
+          branches=$(gh api repos/${{ github.repository }}/branches --paginate -q '.[].name')
+          to_delete=()
+
+          for branch in $branches; do
+            # Check if there's a corresponding pull request for the branch
+            pr=$(gh api --paginate repos/${{ github.repository }}/pulls?state=all --jq ".[] | select(.head.ref==\"${branch}\") | .created_at")
+            
+            if [ -n "$pr" ]; then
+              # Get the branch creation date
+              branch_created=$(gh api repos/${{ github.repository }}/git/ref/heads/$branch --jq '.object.date')
+
+              # Check if the branch is older than 6 months
+              if [[ "$branch_created" < "$six_months_ago" ]]; then
+                to_delete+=($branch)
+              fi
+            fi
+          done
+
+          echo "branches_to_delete=${to_delete[*]}" >> $GITHUB_ENV
+          echo "branches_to_delete=${to_delete[*]}"
+          
+      - name: Delete old branches
+        if: steps.list_branches.outputs.branches_to_delete != ''
+        run: |
+          for branch in ${{ env.branches_to_delete }}; do
+            gh api -X DELETE repos/${{ github.repository }}/git/refs/heads/$branch
+            echo "Deleted branch: $branch"
+          done
+  
+    env:
+      GH_TOKEN: ${{ github.token }}
+          
