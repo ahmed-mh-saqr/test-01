@@ -42,7 +42,7 @@ jobs:
           echo "branches_to_delete=${to_delete[*]}"
           
       - name: Delete old branches
-        if: steps.list_branches.outputs.branches_to_delete != ''
+        # if: steps.list_branches.outputs.branches_to_delete != ''
         run: |
           for branch in ${{ env.branches_to_delete }}; do
             gh api -X DELETE repos/${{ github.repository }}/git/refs/heads/$branch
