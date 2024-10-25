@@ -43,13 +43,13 @@ jobs:
           echo "branches_to_delete=${to_delete[*]}" >> $GITHUB_ENV
           echo "branches_to_delete=${to_delete[*]}"
           
-      # - name: Delete old branches
-      #   # if: steps.list_branches.outputs.branches_to_delete != ''
-      #   run: |
-      #     for branch in ${{ env.branches_to_delete }}; do
-      #       gh api -X DELETE repos/${{ github.repository }}/git/refs/heads/$branch
-      #       echo "Deleted branch: $branch"
-      #     done
+      - name: Delete old branches
+        # if: steps.list_branches.outputs.branches_to_delete != ''
+        run: |
+          for branch in ${{ env.branches_to_delete }}; do
+            gh api -X DELETE repos/${{ github.repository }}/git/refs/heads/$branch
+            echo "Deleted branch: $branch"
+          done
   
     env:
       GH_TOKEN: ${{ github.token }}
