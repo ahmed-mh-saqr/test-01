@@ -15,7 +15,7 @@ jobs:
       id: get_branches
       run: |
         branches=$(gh pr list --state open --json headRefName --jq '.[].headRefName')
-        echo "::set-output name=branches::$branches"
+        echo "::GITHUB_OUTPUT name=branches::$branches"
 
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
