@@ -18,7 +18,7 @@ jobs:
       - name: List branches and check for old PRs
         id: list_branches
         run: |
-          six_months_ago=$(date -d '2 minutes ago' '+%Y-%m-%dT%H:%M:%SZ')
+          six_months_ago=$(date -d '15 minutes ago' '+%Y-%m-%dT%H:%M:%SZ')
           echo "$six_months_ago"
           branches=$(gh api repos/${{ github.repository }}/branches --paginate -q '.[].name')
           to_delete=()
