@@ -39,6 +39,7 @@ jobs:
           done
 
           echo "branches_to_delete=${to_delete[*]}" >> $GITHUB_ENV
+          echo "branches_to_delete=${to_delete[*]}"
           
     env:
       GH_TOKEN: ${{ github.token }}
