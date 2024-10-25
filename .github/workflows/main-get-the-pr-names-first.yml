@@ -1,0 +1,21 @@
+name: Get PR Names list
+
+on:
+  workflow_dispatch: # Allows manual trigger of the workflow
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout the repository
+      uses: actions/checkout@v2
+
+    - name: Get all branches with open pull requests
+      id: get_branches
+      run: |
+        branches=$(gh pr list --state open --json headRefName --jq '.[].headRefName')
+        echo "::set-output name=branches::$branches"
+
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
