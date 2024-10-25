@@ -33,7 +33,7 @@ jobs:
               branch_created=$(gh api repos/${{ github.repository }}/git/ref/heads/$branch --jq '.object.date')
 
               # Check if the branch is older than 6 months
-              if [[ "$branch_created" > "$six_months_ago" ]]; then
+              if [[ "$branch_created" < "$six_months_ago" ]]; then
                 to_delete+=($branch)
               fi
             fi
