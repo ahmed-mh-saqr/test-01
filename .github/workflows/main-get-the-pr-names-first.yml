@@ -39,3 +39,7 @@ jobs:
           done
 
           echo "branches_to_delete=${to_delete[*]}" >> $GITHUB_ENV
+          
+        env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
