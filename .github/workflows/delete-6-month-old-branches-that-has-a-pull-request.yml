@@ -19,10 +19,10 @@ jobs:
         id: list_branches
         run: |
           six_months_ago=$(date -d '6 months ago' '+%Y-%m-%dT%H:%M:%SZ')
-          echo "six_months_ago"
+          echo "$six_months_ago"
           branches=$(gh api repos/${{ github.repository }}/branches --paginate -q '.[].name')
           to_delete=()
-          echo "branches"
+          echo "$branches"
           
           for branch in $branches; do
             # Check if there's a corresponding pull request for the branch
