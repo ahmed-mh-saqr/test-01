@@ -43,7 +43,7 @@ jobs:
           echo "::GITHUB_OUTPUT name=branches_to_delete::${to_delete[*]}"
           
       - name: Delete old branches
-        if: steps.list_branches.outputs.branches_to_delete != ''
+        # if: steps.list_branches.outputs.branches_to_delete != ''
         run: |
           five_minutes_ago=$(date -d '5 minutes ago' '+%Y-%m-%dT%H:%M:%SZ')
 
